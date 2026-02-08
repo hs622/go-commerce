@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"log"
 	"os"
 
@@ -9,6 +8,7 @@ import (
 	"github.com/hs622/ecommerce-cart/configuration"
 	"github.com/hs622/ecommerce-cart/middleware"
 	"github.com/hs622/ecommerce-cart/routes"
+	"github.com/hs622/ecommerce-cart/utils"
 )
 
 type variables struct {
@@ -45,36 +45,35 @@ func GetEnvVariables() *variables {
 func main() {
 
 	// Envorinment Variables
+	utils.Info("Environment Variable configuration.")
 	env := GetEnvVariables()
 
 	// database connection
 	mongodb, err := configuration.DatabaseInit(env.mongoURI, env.dbName)
 	if err != nil {
-		fmt.Printf("Couldn't connect to the database during application startup: %s", err)
+		utils.Error("Couldn't connect to the database during application startup")
 	}
 	defer mongodb.Disconnect()
 
 	// initialising repositories
 	gin.SetMode(gin.ReleaseMode)
 
+	utils.Info("Server is booting up.")
 	http := gin.New()
+	utils.Info("Server is listing at port: http://127.0.0.1:" + env.port)
 	http.SetTrustedProxies([]string{"127.0.0.1"})
 
 	http.Use(gin.Logger())
 	http.Use(gin.Recovery())
 	http.Use(middleware.CORSMiddleware())
-
+	// http.Use(middleware.Authentication())
 	api := http.Group("/api")
 
-	// common
 	routes.ServerRoutes(api)
-
-	// v1
-	// routes.UserRoutes(http)
-	// http.Use(middleware.Authentication())
 	routes.ProductRoutes(api, mongodb.Database)
-	// routes.CartRoutes(http)
 
-	log.Fatal(http.Run(":" + env.port))
+	if err := http.Run(":" + env.port); err != nil {
+		log.Fatal(err)
+	}
 
 }
