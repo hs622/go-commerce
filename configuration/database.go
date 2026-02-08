@@ -3,10 +3,10 @@ package configuration
 import (
 	"context"
 	"fmt"
-	"log"
 	"time"
 
 	"github.com/hs622/ecommerce-cart/repository"
+	"github.com/hs622/ecommerce-cart/utils"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
@@ -42,8 +42,7 @@ func DatabaseInit(uri, dbName string) (*MongoDB, error) {
 		return nil, fmt.Errorf("Failed to ping database: %w", err)
 	}
 
-	log.Println("Successfully establish a connection to the database.")
-
+	utils.Info("Successfully establish a connection to the database.")
 	DbConfiguration(ctx, client.Database(dbName))
 
 	return &MongoDB{
@@ -61,9 +60,9 @@ func (m *MongoDB) Disconnect() error {
 	defer cancel()
 
 	if err := m.Client.Disconnect(ctx); err != nil {
-		return err
+		return fmt.Errorf("%s", err)
 	}
-	log.Println("MongoDB connection closed")
+	utils.Info("MongoDB connection closed")
 	return nil
 }
 
@@ -77,8 +76,10 @@ func DbConfiguration(ctx context.Context, db *mongo.Database) error {
 
 	productRepo := repository.NewProductRepository(db)
 	if err := productRepo.InitIndexes(ctx); err != nil {
-		return fmt.Errorf("Failed to initialized database indexes: %s", err)
+		utils.Error("Failed to initialized database indexes:")
+		return fmt.Errorf("%s", err)
 	}
 
-	return fmt.Errorf("Database indexes initialised.")
+	utils.Info("Database indexes initialised.")
+	return nil
 }
