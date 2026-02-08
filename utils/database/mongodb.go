@@ -10,7 +10,7 @@ import (
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-func QParamsConvertIntoFindOptions(findOptions *options.FindOptionsBuilder, url *url.URL) error {
+func FindOptionsParams(findOptions *options.FindOptionsBuilder, url *url.URL) error {
 
 	findOptions = options.Find()
 	query := url.Query()
@@ -49,9 +49,9 @@ func QParamsConvertIntoFindOptions(findOptions *options.FindOptionsBuilder, url 
 	return nil
 }
 
-func QParamsConvertIntoFilters(filters *bson.D, url *url.URL) error {
+func FindOptionsFilters(filters *bson.D, url *url.URL) error {
 
-	filters = &bson.D{}
+	*filters = bson.D{}
 
 	return nil
 }
