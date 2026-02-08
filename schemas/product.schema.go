@@ -17,7 +17,7 @@ type CreateProductRequest struct {
 	Stock       int           `bson:"stock,omitempty" json:"stock,omitempty" binding:"required"`
 	Images      []string      `bson:"images,omitempty" json:"images,omitempty"`
 	Tags        []string      `bson:"tags,omitempty" json:"tags,omitempty"`
-	IsActive    bool          `bson:"is_active,omitempty" json:"publish,omitempty"`
+	IsActive    bool          `bson:"is_active,omitempty" json:"publish"`
 	Created_at  time.Time     `bson:"created_at" json:"created_at"`
 	Updated_at  time.Time     `bson:"updated_at" json:"updated_at,omitempty"`
 }
