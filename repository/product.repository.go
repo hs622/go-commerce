@@ -26,7 +26,8 @@ func NewProductRepository(db *mongo.Database) *ProductRepository {
 	}
 }
 
-func (r *ProductRepository) InitIndexes(ctx context.Context) error {
+func (r *ProductRepository) InitIndexes(
+	ctx context.Context) error {
 	// Initialising Indexes
 
 	indexModel := mongo.IndexModel{
@@ -42,7 +43,9 @@ func (r *ProductRepository) InitIndexes(ctx context.Context) error {
 	return nil
 }
 
-func (r *ProductRepository) Create(ctx context.Context, product *schemas.Product) error {
+func (r *ProductRepository) CreateSingleProduct(
+	ctx context.Context,
+	product *schemas.CreateProductRequest) error {
 	product.Created_at = time.Now()
 	product.Updated_at = time.Now()
 	product.ProductID = uuid.NewString()
@@ -55,11 +58,19 @@ func (r *ProductRepository) Create(ctx context.Context, product *schemas.Product
 	}
 
 	product.Id = result.InsertedID.(bson.ObjectID)
-
 	return nil
 }
 
-func (r *ProductRepository) FetchProdcutById(ctx context.Context, productId string, product *schemas.Product) error {
+func (r *ProductRepository) FetchProdcutById(
+	ctx context.Context,
+	productId string,
+	product *schemas.CreateProductRequest,
+	url *url.URL) error {
+
+	// var findOptions options.FindOneOptions
+
+	// database.QParamsConvertIntoFindOptions(&findOptions, url)
+
 	err := r.collection.FindOne(ctx, bson.M{"product_id": productId}).Decode(product)
 	if err != nil {
 		return err
@@ -67,15 +78,18 @@ func (r *ProductRepository) FetchProdcutById(ctx context.Context, productId stri
 	return nil
 }
 
-func (r *ProductRepository) FetchProductsWithQuery(ctx context.Context, products *[]schemas.Product, url *url.URL) error {
+func (r *ProductRepository) FetchProductsWithQuery(
+	ctx context.Context,
+	products *[]schemas.CreateProductRequest,
+	url *url.URL) error {
 
 	var filter bson.D
 	var findOptions options.FindOptionsBuilder
 
-	database.QParamsConvertIntoFindOptions(&findOptions, url)
-	database.QParamsConvertIntoFilters(&filter, url)
+	database.FindOptionsParams(&findOptions, url)
+	database.FindOptionsFilters(&filter, url)
 
-	cursor, err := r.collection.Find(ctx, filter, &findOptions)
+	cursor, err := r.collection.Find(ctx, &filter, &findOptions)
 	if err != nil {
 		return err
 	}
@@ -86,11 +100,23 @@ func (r *ProductRepository) FetchProductsWithQuery(ctx context.Context, products
 	return nil
 }
 
-func (r *ProductRepository) Update(ctx context.Context, product *schemas.Product, productId string) error {
+func (r *ProductRepository) UpdateSingleProduct(
+	ctx context.Context,
+	incomingProduct *schemas.PatchProductRequest,
+	productId *string,
+	outgoingProduct *schemas.CreateProductRequest) error {
 
-	product.Updated_at = time.Now()
+	filter := bson.D{{
+		Key: "product_id", Value: &productId,
+	}}
+	options := options.FindOneAndUpdate().SetReturnDocument(options.After)
+	incomingProduct.Updated_at = time.Now()
 
 	// insert modified fields
+	if err := r.collection.FindOneAndUpdate(
+		ctx, filter, bson.D{{Key: "$set", Value: &incomingProduct}}, options).Decode(&outgoingProduct); err != nil {
+		return err
+	}
 
 	return nil
 }

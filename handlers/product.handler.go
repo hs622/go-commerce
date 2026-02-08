@@ -28,7 +28,7 @@ func NewProductHandler(repo *repository.ProductRepository) *ProductHandler {
 }
 
 func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
-	var payload schemas.Product
+	var payload schemas.CreateProductRequest
 
 	if err := ctx.ShouldBindJSON(&payload); err != nil {
 
@@ -60,7 +60,7 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 		}
 	}
 
-	if err := h.repo.Create(ctx.Request.Context(), &payload); err != nil {
+	if err := h.repo.CreateSingleProduct(ctx.Request.Context(), &payload); err != nil {
 		CustomErrors["dbErrors"] = err.Error()
 		utils.ErrorResponse(ctx, http.StatusInternalServerError, "Failed to create product", CustomErrors)
 		return
@@ -75,7 +75,7 @@ func (h *ProductHandler) CreateProduct(ctx *gin.Context) {
 //
 // @Return Product product
 func (h *ProductHandler) GetProductById(ctx *gin.Context) {
-	var product schemas.Product
+	var product schemas.CreateProductRequest
 	var productId = ctx.Param("productId")
 
 	if !utils.CheckUuid(productId) {
@@ -84,7 +84,7 @@ func (h *ProductHandler) GetProductById(ctx *gin.Context) {
 		return
 	}
 
-	if err := h.repo.FetchProdcutById(ctx, productId, &product); err != nil {
+	if err := h.repo.FetchProdcutById(ctx, productId, &product, ctx.Request.URL); err != nil {
 		CustomErrors["error"] = "couldn't find the product."
 		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid product Id.", CustomErrors)
 		return
@@ -101,7 +101,7 @@ func (h *ProductHandler) GetProductById(ctx *gin.Context) {
 //
 // @Return Products []product | error
 func (h *ProductHandler) GetProdcutByQuery(ctx *gin.Context) {
-	var products []schemas.Product
+	var products []schemas.CreateProductRequest
 
 	if err := h.repo.FetchProductsWithQuery(ctx, &products, ctx.Request.URL); err != nil {
 		log.Fatalln("Inside fetchProductWithQuery: ", err)
@@ -113,17 +113,42 @@ func (h *ProductHandler) GetProdcutByQuery(ctx *gin.Context) {
 
 // Update Product
 func (h *ProductHandler) UpdateProduct(ctx *gin.Context) {
-	var product schemas.Product
+	var updateProduct schemas.CreateProductRequest
+	var product schemas.PatchProductRequest
+	var productId = ctx.Param("productId")
 
-	body, _ := ctx.GetRawData()
+	//check for uuid
+	if !utils.CheckUuid(productId) {
+		CustomErrors["error"] = "couldn't  find the product."
+		utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid product Id.", CustomErrors)
+		return
+	}
 
 	// validation part
-	fmt.Println("Request uri: ", ctx.Request.URL)
-	fmt.Printf("Request body: %s", body)
+	if err := ctx.ShouldBindJSON(&product); err != nil {
+		utils.Error(fmt.Sprint(err))
+
+		var validationErrors validator.ValidationErrors
+		if errors.As(err, &validationErrors) {
+
+			for _, fieldErr := range validationErrors {
+				field := strings.ToLower(fieldErr.Field())
+				tag := strings.ToLower(fieldErr.Tag())
+
+				CustomErrors[field] = tag
+			}
+
+			utils.ErrorResponse(ctx, http.StatusBadRequest, "Invalid request payload", CustomErrors)
+			return
+		}
+	}
 
 	// repository method
+	if err := h.repo.UpdateSingleProduct(ctx, &product, &productId, &updateProduct); err != nil {
+		utils.Error(fmt.Sprint(err))
+	}
 
-	utils.SuccessResponse(ctx, http.StatusOK, "Product has been updated sucessfully.", product)
+	utils.SuccessResponse(ctx, http.StatusOK, "Product has been updated sucessfully.", updateProduct)
 }
 
 // Delete Products
