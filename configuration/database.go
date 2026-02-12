@@ -76,7 +76,13 @@ func DbConfiguration(ctx context.Context, db *mongo.Database) error {
 
 	productRepo := repository.NewProductRepository(db)
 	if err := productRepo.InitIndexes(ctx); err != nil {
-		utils.Error("Failed to initialized database indexes:")
+		utils.Error("Failed to register product indexes")
+		return fmt.Errorf("%s", err)
+	}
+
+	orderRepo := repository.NewOrderRepository(db)
+	if err := orderRepo.RegisterIndexesForOrder(ctx); err != nil {
+		utils.Error("Failed to register order indexes")
 		return fmt.Errorf("%s", err)
 	}
 
