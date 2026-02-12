@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/google/uuid"
 	"github.com/hs622/ecommerce-cart/constants"
 	"github.com/hs622/ecommerce-cart/schemas"
 	"github.com/hs622/ecommerce-cart/utils"
@@ -40,8 +41,12 @@ func (r *OrderRepository) RegisterIndexesForOrder(ctx context.Context) error {
 
 func (r *OrderRepository) CreateSingleOrder(ctx context.Context, order *schemas.CreateOrderRequest) error {
 
-	order.Status.OrderHold = true
-	order.Status.PaymemtStatus = constants.ORDER_PENDING
+	var status schemas.OrderStatus
+	status.OrderHold = true
+	status.PaymemtStatus = constants.ORDER_PENDING
+
+	order.Status = &status
+	order.OrderID = uuid.NewString()
 	order.OrderedAt = time.Now()
 
 	result, err := r.collection.InsertOne(ctx, order)
