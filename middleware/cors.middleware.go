@@ -1,6 +1,11 @@
 package middleware
 
-import "github.com/gin-gonic/gin"
+import (
+	"net/http"
+
+	"github.com/gin-gonic/gin"
+	"github.com/hs622/ecommerce-cart/utils"
+)
 
 // high-ordered function
 func CORSMiddleware() gin.HandlerFunc {
@@ -14,6 +19,14 @@ func CORSMiddleware() gin.HandlerFunc {
 
 		if ctx.Request.Method == "Options" {
 			ctx.AbortWithStatus(204)
+			return
+		}
+
+		errors := make(map[string]string)
+		if ctx.Request.Header.Get("Content-Type") != "application/json" {
+			errors["header"] = "Please attach JSON header."
+			utils.ErrorResponse(ctx, http.StatusBadRequest, "Insufficient request headers.", errors)
+			ctx.Abort()
 			return
 		}
 
