@@ -12,6 +12,7 @@ const (
 	ORDER_PENDING   PaymemtStatus = "pedning"
 	ORDER_COMPLETED PaymemtStatus = "completed"
 	ORDER_REJECT    PaymemtStatus = "reject"
+	ORDER_WITHDRAW  PaymemtStatus = "withdraw"
 
 	//
 
