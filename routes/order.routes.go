@@ -19,6 +19,7 @@ func OrderRoutes(rg *gin.RouterGroup, db *mongo.Database) {
 	order.GET("/:orderId", orderHandler.GetOrder)
 	order.POST("/create-order", orderHandler.CreateOrder)
 	order.PATCH("/:orderId", orderHandler.UpdateOrder)
+	order.PATCH("/cancel/:orderId", orderHandler.CancelOrder)
 	order.DELETE("/:orderId", orderHandler.UpdateOrder)
 
 }
