@@ -121,7 +121,7 @@ func (r *OrderHandler) CancelOrder(ctx *gin.Context) {
 		return
 	}
 
-	utils.SuccessResponse(ctx, http.StatusBadRequest, "Order cancelled.", nil)
+	utils.SuccessResponse(ctx, http.StatusOK, "Order cancelled.", nil)
 }
 
 func (r *OrderHandler) SoftDeleteOrder(ctx *gin.Context) {
