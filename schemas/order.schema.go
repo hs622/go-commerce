@@ -32,7 +32,18 @@ type CreateOrderRequest struct {
 	PaymentReferenceID string                   `bson:"payment_reference_id" json:"payment_reference_id,omitempty" binding:"omitempty,uuid4"`
 	Status             *OrderStatus             `bson:"status" json:"status,omitempty"`
 	OrderedAt          time.Time                `bson:"ordered_at" json:"ordered_at"`
+	UpdatedAt          time.Time                `bson:"updated_at" json:"updated_at"`
+	DeletedAt          *time.Time               `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"`
 }
 
 // update order request struct
-type PatchOrderRequest struct{}
+type PatchOrderRequest struct {
+	Items          []Item      `bson:"items" json:"items" binding:"required,min=1,dive"`
+	TotalPrice     float64     `bson:"total_price" json:"total_price" binding:"required_if_item_is_available"`
+	VAT            float64     `bson:"vat" json:"vat" binding:"required_if_item_is_available"`
+	DiscountAmount float64     `bson:"discount_amount" json:"discount_amount,omitempty"`
+	DiscountCode   string      `bson:"discount_code" json:"discount_code,omitempty"`
+	Status         OrderStatus `bson:"status" json:"status"`
+	UpdatedAt      time.Time   `bson:"updated_at" json:"updated_at"`
+	DeletedAt      *time.Time  `bson:"deleted_at,omitempty" json:"deleted_at,omitempty"`
+}
