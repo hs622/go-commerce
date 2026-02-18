@@ -70,7 +70,7 @@ func main() {
 	http.Use(gin.Logger())
 	http.Use(gin.Recovery())
 	http.Use(middleware.CORSMiddleware())
-	http.Use(middleware.POSTRequestMiddleware())
+	http.Use(middleware.HandleRequestMiddleware())
 	// http.Use(middleware.Authentication())
 	api := http.Group("/api")
 

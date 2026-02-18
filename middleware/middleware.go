@@ -2,15 +2,17 @@ package middleware
 
 import (
 	"bytes"
+	"fmt"
 	"io"
 	"net/http"
 	"slices"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hs622/ecommerce-cart/middleware/exemption"
 	"github.com/hs622/ecommerce-cart/utils"
 )
 
-func POSTRequestMiddleware() gin.HandlerFunc {
+func HandleRequestMiddleware() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
 
 		errors := make(map[string]string)
@@ -21,10 +23,12 @@ func POSTRequestMiddleware() gin.HandlerFunc {
 			http.MethodPut,
 		}
 
-		if slices.Contains(methods, ctx.Request.Method) {
-
+		fmt.Println(slices.Contains(exemption.APIExemptions, ctx.FullPath()))
+		if slices.Contains(exemption.APIExemptions, ctx.FullPath()) { // high priority exemptions.
+			ctx.Next()
+			return
+		} else if slices.Contains(methods, ctx.Request.Method) {
 			if ctx.Request.Header.Get("Content-type") == "application/json" {
-
 				body, err := ctx.GetRawData()
 				if len(body) == 0 || err != nil {
 					errors["error"] = "unable to parse json."
