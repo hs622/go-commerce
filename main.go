@@ -9,6 +9,7 @@ import (
 	"github.com/hs622/ecommerce-cart/middleware"
 	"github.com/hs622/ecommerce-cart/routes"
 	"github.com/hs622/ecommerce-cart/utils"
+	"github.com/hs622/ecommerce-cart/utils/validation"
 )
 
 type variables struct {
@@ -55,6 +56,9 @@ func main() {
 	}
 	defer mongodb.Disconnect()
 
+	// Custom request validation registration
+	validation.RegisterCustomRequestValidation()
+
 	// initialising repositories
 	gin.SetMode(gin.ReleaseMode)
 
@@ -66,11 +70,13 @@ func main() {
 	http.Use(gin.Logger())
 	http.Use(gin.Recovery())
 	http.Use(middleware.CORSMiddleware())
+	http.Use(middleware.HandleRequestMiddleware())
 	// http.Use(middleware.Authentication())
 	api := http.Group("/api")
 
 	routes.ServerRoutes(api)
 	routes.ProductRoutes(api, mongodb.Database)
+	routes.OrderRoutes(api, mongodb.Database)
 
 	if err := http.Run(":" + env.port); err != nil {
 		log.Fatal(err)
