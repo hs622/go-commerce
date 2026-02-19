@@ -33,17 +33,12 @@ func FindOptionsParams(findOptions *options.FindOptionsBuilder, url *url.URL) er
 		findOptions.SetSkip(constants.PRODUCT_OFFSET)
 	}
 
-	// Handle field selection
-	if fields := query.Get("select"); fields != "" {
-		projection := bson.D{}
-		for _, field := range strings.Split(fields, ",") {
-			if trimmed := strings.TrimSpace(field); trimmed != "" {
-				projection = append(projection, bson.E{Key: trimmed, Value: 1})
-			}
-		}
-		if len(projection) > 0 {
-			findOptions.SetProjection(projection)
-		}
+	projection, err := createProjection(url)
+	if err != nil {
+		return err
+	}
+	if len(projection) > 0 {
+		findOptions.SetProjection(projection)
 	}
 
 	return nil
@@ -54,4 +49,36 @@ func FindOptionsFilters(filters *bson.D, url *url.URL) error {
 	*filters = bson.D{}
 
 	return nil
+}
+
+func FindOneOptionsParams(findOneOptions *options.FindOneOptionsBuilder, url *url.URL) error {
+
+	findOneOptions = options.FindOne()
+
+	projective, err := createProjection(url)
+	if err != nil {
+		return err
+	}
+	if len(projective) > 0 {
+		findOneOptions.SetProjection(projective)
+	}
+
+	return nil
+}
+
+func createProjection(url *url.URL) (bson.D, error) {
+
+	// Handle field projection
+	projection := bson.D{}
+	query := url.Query()
+
+	if fields := query.Get("select"); fields != "" {
+		for _, field := range strings.Split(fields, ",") {
+			if trimmed := strings.TrimSpace(field); trimmed != "" {
+				projection = append(projection, bson.E{Key: trimmed, Value: 1})
+			}
+		}
+	}
+
+	return projection, nil
 }
