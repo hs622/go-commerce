@@ -1,6 +1,6 @@
 package schemas
 
-type Stripe struct {
+type stripe struct {
 }
 
 type CreatePaymentIntentRequest struct {
@@ -9,7 +9,7 @@ type CreatePaymentIntentRequest struct {
 	UserID    string `json:"user_id" binding:"required,uuid4"`
 
 	// stripe
-	Stripe Stripe `bson:"stripe" json:"-"`
+	Stripe stripe `bson:"stripe" json:"-"`
 }
 
 type PatchPaymentIntentRequest struct {
