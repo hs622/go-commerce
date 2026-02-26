@@ -2,43 +2,28 @@ package main
 
 import (
 	"log"
-	"os"
 
 	"github.com/gin-gonic/gin"
 	"github.com/hs622/ecommerce-cart/configuration"
+	"github.com/hs622/ecommerce-cart/constants"
 	"github.com/hs622/ecommerce-cart/middleware"
 	"github.com/hs622/ecommerce-cart/routes"
 	"github.com/hs622/ecommerce-cart/utils"
 	"github.com/hs622/ecommerce-cart/utils/validation"
 )
 
-type variables struct {
+type ApplicationVariables struct {
 	port     string
 	mongoURI string
 	dbName   string
 }
 
-func GetEnvVariables() *variables {
+func GetEnvVariables() *ApplicationVariables {
 
-	port := os.Getenv("PORT")
-	if port == "" {
-		port = "8080"
-	}
-
-	mongoURI := os.Getenv("MONGO_URI")
-	if mongoURI == "" {
-		mongoURI = "mongodb://localhost:27017"
-	}
-
-	dbName := os.Getenv("DATABASE_NAME")
-	if dbName == "" {
-		dbName = "__testing_ase23oe_go"
-	}
-
-	return &variables{
-		port:     port,
-		mongoURI: mongoURI,
-		dbName:   dbName,
+	return &ApplicationVariables{
+		port:     string(constants.SYS_PORT),
+		mongoURI: string(constants.DATABASE_URI),
+		dbName:   string(constants.DATABASE_NAME),
 	}
 }
 
