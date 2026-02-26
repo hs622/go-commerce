@@ -57,8 +57,11 @@ func main() {
 	http.Use(middleware.CORSMiddleware())
 	http.Use(middleware.HandleRequestMiddleware())
 	// http.Use(middleware.Authentication())
-	api := http.Group("/api")
 
+	api := http.Group("/api")
+	wb := http.Group("/wb")
+
+	routes.WebhookRoute(wb)
 	routes.ServerRoutes(api)
 	routes.ProductRoutes(api, mongodb.Database)
 	routes.OrderRoutes(api, mongodb.Database)
