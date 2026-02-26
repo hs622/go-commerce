@@ -2,8 +2,10 @@ package middleware
 
 import (
 	"net/http"
+	"slices"
 
 	"github.com/gin-gonic/gin"
+	"github.com/hs622/ecommerce-cart/middleware/exemption"
 	"github.com/hs622/ecommerce-cart/utils"
 )
 
@@ -22,12 +24,14 @@ func CORSMiddleware() gin.HandlerFunc {
 			return
 		}
 
-		errors := make(map[string]string)
-		if ctx.Request.Header.Get("Content-Type") != "application/json" {
-			errors["header"] = "Please attach JSON header."
-			utils.ErrorResponse(ctx, http.StatusBadRequest, "Insufficient request headers.", errors)
-			ctx.Abort()
-			return
+		if !slices.Contains(exemption.WebHooksExemptions, ctx.FullPath()) {
+			errors := make(map[string]string)
+			if ctx.Request.Header.Get("Content-Type") != "application/json" {
+				errors["header"] = "Please attach JSON header."
+				utils.ErrorResponse(ctx, http.StatusBadRequest, "Header Missing.", errors)
+				ctx.Abort()
+				return
+			}
 		}
 
 		ctx.Next()
