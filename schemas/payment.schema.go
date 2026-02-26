@@ -1,0 +1,16 @@
+package schemas
+
+type stripe struct {
+}
+
+type CreatePaymentIntentRequest struct {
+	Id        string `bson:"-" json:"-"`
+	PaymentID string `json:"payment_id" binding:"uuid4"`
+	UserID    string `json:"user_id" binding:"required,uuid4"`
+
+	// stripe
+	Stripe stripe `bson:"stripe" json:"-"`
+}
+
+type PatchPaymentIntentRequest struct {
+}
