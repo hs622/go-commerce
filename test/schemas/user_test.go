@@ -9,9 +9,7 @@ import (
 	"github.com/hs622/ecommerce-cart/schemas"
 )
 
-var validate = validator.New()
-
-func TestCreateUserRequest_Validation(t *testing.T) {
+func TestCreateUserRequest(t *testing.T) {
 	validate.SetTagName("binding")
 
 	tests := []struct {
@@ -172,7 +170,7 @@ func TestCreateUserRequest_Validation(t *testing.T) {
 
 			if Case.WantErr {
 				if err == nil {
-					t.Errorf("expected validation error but got none.")
+					t.Errorf("Expected validation error but got none.")
 					return
 				}
 
@@ -185,7 +183,7 @@ func TestCreateUserRequest_Validation(t *testing.T) {
 						}
 					}
 					if !found {
-						t.Errorf("expected error on field %q, got %v", Case.ErrField, err)
+						t.Errorf("Expected error on field %q, got %v", Case.ErrField, err)
 					}
 				}
 			} else {
@@ -344,7 +342,7 @@ func TestPatchUserRequest(t *testing.T) {
 						}
 					}
 					if !found {
-						t.Errorf("Expected error on field %q, gor %v", Case.ErrField, err)
+						t.Errorf("Expected error on field %q, got: %v", Case.ErrField, err)
 					}
 				}
 			} else {
