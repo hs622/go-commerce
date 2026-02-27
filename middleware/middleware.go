@@ -2,7 +2,6 @@ package middleware
 
 import (
 	"bytes"
-	"fmt"
 	"io"
 	"net/http"
 	"slices"
@@ -23,7 +22,6 @@ func HandleRequestMiddleware() gin.HandlerFunc {
 			http.MethodPut,
 		}
 
-		fmt.Println(slices.Contains(exemption.APIExemptions, ctx.FullPath()))
 		if slices.Contains(exemption.APIExemptions, ctx.FullPath()) { // high priority exemptions.
 			ctx.Next()
 			return
