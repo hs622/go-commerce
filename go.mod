@@ -6,7 +6,6 @@ require (
 	github.com/gin-gonic/gin v1.11.0
 	github.com/go-playground/validator/v10 v10.30.1
 	github.com/google/uuid v1.6.0
-	github.com/stripe/stripe-go v70.15.0+incompatible
 	github.com/stripe/stripe-go/v84 v84.3.0
 	go.mongodb.org/mongo-driver/v2 v2.5.0
 )
