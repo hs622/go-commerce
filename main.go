@@ -66,6 +66,7 @@ func main() {
 	routes.ProductRoutes(api, mongodb.Database)
 	routes.OrderRoutes(api, mongodb.Database)
 	routes.PaymentRoutes(api, mongodb.Database)
+	routes.UserRouters(api, mongodb.Database)
 
 	if err := http.Run(":" + env.port); err != nil {
 		log.Fatal(err)
