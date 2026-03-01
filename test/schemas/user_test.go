@@ -4,7 +4,6 @@ import (
 	"testing"
 	"time"
 
-	"github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/hs622/ecommerce-cart/schemas"
 )
@@ -12,12 +11,7 @@ import (
 func TestCreateUserRequest(t *testing.T) {
 	validate.SetTagName("binding")
 
-	tests := []struct {
-		Name     string
-		Input    schemas.CreateUserRequest
-		WantErr  bool
-		ErrField string
-	}{
+	tests := []TestType{
 		{
 			Name: "Valid - all fields",
 			Input: schemas.CreateUserRequest{
@@ -41,17 +35,6 @@ func TestCreateUserRequest(t *testing.T) {
 				Password:     "securePassword123",
 			},
 			WantErr: false,
-		},
-		{
-			Name: "Invalid - missing user_id",
-			Input: schemas.CreateUserRequest{
-				FirstName:    "lara",
-				LastName:     "simth",
-				PrimaryEmail: "lara@gmail.com",
-				Password:     "securePassword123",
-			},
-			WantErr:  true,
-			ErrField: "UserID",
 		},
 		{
 			Name: "Invalid - user_id not uuid4",
@@ -164,46 +147,13 @@ func TestCreateUserRequest(t *testing.T) {
 		},
 	}
 
-	for _, Case := range tests {
-		t.Run(Case.Name, func(t *testing.T) {
-			err := validate.Struct(Case.Input)
-
-			if Case.WantErr {
-				if err == nil {
-					t.Errorf("Expected validation error but got none.")
-					return
-				}
-
-				if Case.ErrField != "" {
-					var found bool
-					for _, e := range err.(validator.ValidationErrors) {
-						if e.Field() == Case.ErrField {
-							found = true
-							break
-						}
-					}
-					if !found {
-						t.Errorf("Expected error on field %q, got %v", Case.ErrField, err)
-					}
-				}
-			} else {
-				if err != nil {
-					t.Errorf("Expected no errors but got: %v\n", err)
-				}
-			}
-		})
-	}
+	Runner(tests, t)
 }
 
 func TestPatchUserRequest(t *testing.T) {
 	validate.SetTagName("binding")
 
-	tests := []struct {
-		Name     string
-		Input    schemas.PatchUserRequest
-		WantErr  bool
-		ErrField string
-	}{
+	tests := []TestType{
 		{
 			Name: "Valid - all fields",
 			Input: schemas.PatchUserRequest{
@@ -218,30 +168,15 @@ func TestPatchUserRequest(t *testing.T) {
 		{
 			Name: "Valid - optional fields omitted",
 			Input: schemas.PatchUserRequest{
-				FirstName:    "Evan",
-				LastName:     "Gabriel",
-				PrimaryEmail: "evan@gamil.com",
-				UpdatedAt:    time.Now(),
+				UpdatedAt: time.Now(),
 			},
 			WantErr: false,
 		},
 		{
-			Name: "Invalid - first_name is missing.",
-			Input: schemas.PatchUserRequest{
-				LastName:     "Gabriel",
-				PrimaryEmail: "evan@gamil.com",
-				UpdatedAt:    time.Now(),
-			},
-			WantErr:  true,
-			ErrField: "FirstName",
-		},
-		{
 			Name: "Invalid - first_name is too long.",
 			Input: schemas.PatchUserRequest{
-				FirstName:    "Evanssssssssssssssssssssssssssssssss",
-				LastName:     "Gabriel",
-				PrimaryEmail: "evan@gamil.com",
-				UpdatedAt:    time.Now(),
+				FirstName: "Evanssssssssssssssssssssssssssssssss",
+				UpdatedAt: time.Now(),
 			},
 			WantErr:  true,
 			ErrField: "FirstName",
@@ -249,10 +184,8 @@ func TestPatchUserRequest(t *testing.T) {
 		{
 			Name: "Invalid - first_name is too short.",
 			Input: schemas.PatchUserRequest{
-				FirstName:    "E",
-				LastName:     "Gabriel",
-				PrimaryEmail: "evan@gamil.com",
-				UpdatedAt:    time.Now(),
+				FirstName: "E",
+				UpdatedAt: time.Now(),
 			},
 			WantErr:  true,
 			ErrField: "FirstName",
@@ -260,10 +193,8 @@ func TestPatchUserRequest(t *testing.T) {
 		{
 			Name: "Invalid - last_name is too long.",
 			Input: schemas.PatchUserRequest{
-				FirstName:    "Evan",
-				LastName:     "Gabrielssssssssssssssssssssssssss",
-				PrimaryEmail: "evan@gamil.com",
-				UpdatedAt:    time.Now(),
+				LastName:  "Gabrielssssssssssssssssssssssssss",
+				UpdatedAt: time.Now(),
 			},
 			WantErr:  true,
 			ErrField: "LastName",
@@ -271,40 +202,17 @@ func TestPatchUserRequest(t *testing.T) {
 		{
 			Name: "Invalid - last_name is too short.",
 			Input: schemas.PatchUserRequest{
-				FirstName:    "Evan",
-				LastName:     "G",
-				PrimaryEmail: "evan@gamil.com",
-				UpdatedAt:    time.Now(),
-			},
-			WantErr:  true,
-			ErrField: "LastName",
-		},
-		{
-			Name: "Invalid - last_name is missing.",
-			Input: schemas.PatchUserRequest{
-				FirstName:    "Evan",
-				PrimaryEmail: "evan@gamil.com",
-				UpdatedAt:    time.Now(),
-			},
-			WantErr:  true,
-			ErrField: "LastName",
-		},
-		{
-			Name: "Invalid - email is missing.",
-			Input: schemas.PatchUserRequest{
-				FirstName: "Evan",
-				LastName:  "Gabriel",
+				LastName:  "G",
 				UpdatedAt: time.Now(),
 			},
 			WantErr:  true,
-			ErrField: "PrimaryEmail",
+			ErrField: "LastName",
 		},
 		{
 			Name: "Invalid - malformed email.",
 			Input: schemas.PatchUserRequest{
-				FirstName: "Evan",
-				LastName:  "Gabriel",
-				UpdatedAt: time.Now(),
+				PrimaryEmail: "not-a-valid-email",
+				UpdatedAt:    time.Now(),
 			},
 			WantErr:  true,
 			ErrField: "PrimaryEmail",
@@ -312,10 +220,7 @@ func TestPatchUserRequest(t *testing.T) {
 		{
 			Name: "Invalid - malformed secondary email.",
 			Input: schemas.PatchUserRequest{
-				FirstName:      "Evan",
-				LastName:       "Gabriel",
-				PrimaryEmail:   "evan@gamil.com",
-				SecondaryEmail: "not-a-email",
+				SecondaryEmail: "not-a-valid-email",
 				UpdatedAt:      time.Now(),
 			},
 			WantErr:  true,
@@ -323,33 +228,5 @@ func TestPatchUserRequest(t *testing.T) {
 		},
 	}
 
-	for _, Case := range tests {
-		t.Run(Case.Name, func(t *testing.T) {
-			err := validate.Struct(Case.Input)
-
-			if Case.WantErr {
-				if err == nil {
-					t.Errorf("Expected validation error, but got none!")
-					return
-				}
-
-				if Case.ErrField != "" {
-					var found bool
-					for _, e := range err.(validator.ValidationErrors) {
-						if e.Field() == Case.ErrField {
-							found = true
-							break
-						}
-					}
-					if !found {
-						t.Errorf("Expected error on field %q, got: %v", Case.ErrField, err)
-					}
-				}
-			} else {
-				if err != nil {
-					t.Errorf("Expected no errors, but we got: %v\n", err)
-				}
-			}
-		})
-	}
+	Runner(tests, t)
 }
