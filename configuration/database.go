@@ -86,6 +86,12 @@ func DbConfiguration(ctx context.Context, db *mongo.Database) error {
 		return fmt.Errorf("%s", err)
 	}
 
+	userRepo := repository.NewUserRepository(db)
+	if err := userRepo.RegisterIndexesForUser(ctx); err != nil {
+		utils.Error("Failed to register user indexes.")
+		return fmt.Errorf("%s", err)
+	}
+
 	utils.Info("Database indexes initialised.")
 	return nil
 }
