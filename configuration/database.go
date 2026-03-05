@@ -7,6 +7,8 @@ import (
 
 	"github.com/hs622/ecommerce-cart/repository"
 	"github.com/hs622/ecommerce-cart/utils"
+	"github.com/hs622/ecommerce-cart/utils/database"
+	"go.mongodb.org/mongo-driver/v2/event"
 	"go.mongodb.org/mongo-driver/v2/mongo"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 	"go.mongodb.org/mongo-driver/v2/mongo/readpref"
@@ -28,8 +30,13 @@ func DatabaseInit(uri, dbName string) (*MongoDB, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 
+	// monitor database queries
+	monitor := &database.CommandMonitor{}
+
 	// Create Client Options
-	clientOptions := options.Client().ApplyURI(uri)
+	clientOptions := options.Client().ApplyURI(uri).SetMonitor(&event.CommandMonitor{
+		Started: monitor.Started,
+	})
 
 	// Connect to Database
 	client, err := mongo.Connect(clientOptions)
@@ -43,7 +50,7 @@ func DatabaseInit(uri, dbName string) (*MongoDB, error) {
 	}
 
 	utils.Info("Successfully establish a connection to the database.")
-	DbConfiguration(ctx, client.Database(dbName))
+	ConfiguringDatabase(ctx, client.Database(dbName))
 
 	return &MongoDB{
 		Client:   client,
@@ -72,7 +79,7 @@ func (m *MongoDB) Disconnect() error {
 // @Param db mongo.Database
 //
 // @Return error if occurred
-func DbConfiguration(ctx context.Context, db *mongo.Database) error {
+func ConfiguringDatabase(ctx context.Context, db *mongo.Database) error {
 
 	productRepo := repository.NewProductRepository(db)
 	if err := productRepo.InitIndexes(ctx); err != nil {
