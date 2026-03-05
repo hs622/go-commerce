@@ -1,18 +1,26 @@
 package database
 
 import (
+	"fmt"
 	"net/url"
+	"slices"
 	"strconv"
 	"strings"
 
 	"github.com/hs622/ecommerce-cart/constants"
+	"github.com/hs622/ecommerce-cart/utils"
 	"go.mongodb.org/mongo-driver/v2/bson"
 	"go.mongodb.org/mongo-driver/v2/mongo/options"
 )
 
-func FindOptionsParams(findOptions *options.FindOptionsBuilder, url *url.URL) error {
+type UserFetchOptions struct {
+	Url      *url.URL
+	FullPath string
+}
 
-	findOptions = options.Find()
+func FindOptionsParams(url *url.URL) (*options.FindOptionsBuilder, error) {
+
+	findOptions := options.Find()
 	query := url.Query()
 
 	// Handle limit
@@ -35,13 +43,13 @@ func FindOptionsParams(findOptions *options.FindOptionsBuilder, url *url.URL) er
 
 	projection, err := createProjection(url)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if len(projection) > 0 {
 		findOptions.SetProjection(projection)
 	}
 
-	return nil
+	return findOptions, nil
 }
 
 func FindOptionsFilters(filters *bson.D, url *url.URL) error {
@@ -51,19 +59,48 @@ func FindOptionsFilters(filters *bson.D, url *url.URL) error {
 	return nil
 }
 
-func FindOneOptionsParams(findOneOptions *options.FindOneOptionsBuilder, url *url.URL) error {
+func FindOneOptionsParams(url *url.URL) (*options.FindOneOptionsBuilder, error) {
 
-	findOneOptions = options.FindOne()
+	findOneOpts := options.FindOne()
+
+	if url.Query().Get("select") == "*" {
+		return nil, nil
+	}
 
 	projective, err := createProjection(url)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	if len(projective) > 0 {
-		findOneOptions.SetProjection(projective)
+		findOneOpts.SetProjection(projective)
 	}
 
-	return nil
+	return findOneOpts, nil
+}
+
+func FindOneOptionsFilters(opts UserFetchOptions) (bson.D, error) {
+
+	filters := bson.D{}
+	crumbs := strings.Split(opts.FullPath, "/:")
+	urlWithOutParams := crumbs[0]
+	paramsKeysSlices := slices.Delete(crumbs, 0, 1)
+	paramsValuesString, _ := strings.CutPrefix(opts.Url.Path, urlWithOutParams+"/")
+
+	paramsValuesSlices := strings.Split(paramsValuesString, "/")
+
+	fmt.Println(paramsKeysSlices, paramsValuesSlices, paramsValuesString)
+	if len(paramsKeysSlices) == len(paramsValuesSlices) {
+		for i, key := range paramsKeysSlices {
+			filters = append(filters, bson.E{
+				Key:   utils.ToSnakeCase(key),
+				Value: paramsValuesSlices[i],
+			})
+		}
+	} else {
+		return nil, fmt.Errorf("Unequal params received.")
+	}
+
+	return filters, nil
 }
 
 func createProjection(url *url.URL) (bson.D, error) {
