@@ -14,8 +14,10 @@ func UserRouters(rg *gin.RouterGroup, db *mongo.Database) {
 
 	user := rg.Group("/v1/users")
 
-	user.POST("/create", userHandler.CreateUser)
-
+	user.GET("", userHandler.GetUsers)
 	user.GET("/:userId", userHandler.GetUser)
-	user.GET("/users", userHandler.GetUsers)
+
+	user.POST("/create", userHandler.CreateUser)
+	user.PATCH("/:userId", userHandler.UpdateUser)
+
 }
