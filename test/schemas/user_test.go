@@ -10,6 +10,7 @@ import (
 
 func TestCreateUserRequest(t *testing.T) {
 	validate.SetTagName("binding")
+	tt := time.Now()
 
 	tests := []TestType{
 		{
@@ -20,8 +21,8 @@ func TestCreateUserRequest(t *testing.T) {
 				LastName:     "smith",
 				PrimaryEmail: "lara@gmail.com",
 				Password:     "securePassword123",
-				CreatedAt:    time.Now(),
-				UpdatedAt:    time.Now(),
+				CreatedAt:    &tt,
+				UpdatedAt:    &tt,
 			},
 			WantErr: false,
 		},
@@ -139,8 +140,8 @@ func TestCreateUserRequest(t *testing.T) {
 				PrimaryEmail:   "lara@gamil.com",
 				Password:       "securePassowrd123",
 				SecondaryEmail: "not-a-email",
-				CreatedAt:      time.Now(),
-				UpdatedAt:      time.Now(),
+				CreatedAt:      &tt,
+				UpdatedAt:      &tt,
 			},
 			WantErr:  true,
 			ErrField: "SecondaryEmail",
@@ -152,6 +153,7 @@ func TestCreateUserRequest(t *testing.T) {
 
 func TestPatchUserRequest(t *testing.T) {
 	validate.SetTagName("binding")
+	tt := time.Now()
 
 	tests := []TestType{
 		{
@@ -161,14 +163,14 @@ func TestPatchUserRequest(t *testing.T) {
 				LastName:       "Gabriel",
 				PrimaryEmail:   "evan@gamil.com",
 				SecondaryEmail: "backup-evan@gmail.com",
-				UpdatedAt:      time.Now(),
+				UpdatedAt:      &tt,
 			},
 			WantErr: false,
 		},
 		{
 			Name: "Valid - optional fields omitted",
 			Input: schemas.PatchUserRequest{
-				UpdatedAt: time.Now(),
+				UpdatedAt: &tt,
 			},
 			WantErr: false,
 		},
@@ -176,7 +178,7 @@ func TestPatchUserRequest(t *testing.T) {
 			Name: "Invalid - first_name is too long.",
 			Input: schemas.PatchUserRequest{
 				FirstName: "Evanssssssssssssssssssssssssssssssss",
-				UpdatedAt: time.Now(),
+				UpdatedAt: &tt,
 			},
 			WantErr:  true,
 			ErrField: "FirstName",
@@ -185,7 +187,7 @@ func TestPatchUserRequest(t *testing.T) {
 			Name: "Invalid - first_name is too short.",
 			Input: schemas.PatchUserRequest{
 				FirstName: "E",
-				UpdatedAt: time.Now(),
+				UpdatedAt: &tt,
 			},
 			WantErr:  true,
 			ErrField: "FirstName",
@@ -194,7 +196,7 @@ func TestPatchUserRequest(t *testing.T) {
 			Name: "Invalid - last_name is too long.",
 			Input: schemas.PatchUserRequest{
 				LastName:  "Gabrielssssssssssssssssssssssssss",
-				UpdatedAt: time.Now(),
+				UpdatedAt: &tt,
 			},
 			WantErr:  true,
 			ErrField: "LastName",
@@ -203,7 +205,7 @@ func TestPatchUserRequest(t *testing.T) {
 			Name: "Invalid - last_name is too short.",
 			Input: schemas.PatchUserRequest{
 				LastName:  "G",
-				UpdatedAt: time.Now(),
+				UpdatedAt: &tt,
 			},
 			WantErr:  true,
 			ErrField: "LastName",
@@ -212,7 +214,7 @@ func TestPatchUserRequest(t *testing.T) {
 			Name: "Invalid - malformed email.",
 			Input: schemas.PatchUserRequest{
 				PrimaryEmail: "not-a-valid-email",
-				UpdatedAt:    time.Now(),
+				UpdatedAt:    &tt,
 			},
 			WantErr:  true,
 			ErrField: "PrimaryEmail",
@@ -221,7 +223,7 @@ func TestPatchUserRequest(t *testing.T) {
 			Name: "Invalid - malformed secondary email.",
 			Input: schemas.PatchUserRequest{
 				SecondaryEmail: "not-a-valid-email",
-				UpdatedAt:      time.Now(),
+				UpdatedAt:      &tt,
 			},
 			WantErr:  true,
 			ErrField: "SecondaryEmail",
