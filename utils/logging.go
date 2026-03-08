@@ -16,6 +16,7 @@ const (
 	WARNING
 	ERROR
 	FATAL
+	QUERY
 
 	// ANSI color codes
 
@@ -84,7 +85,7 @@ func (d *Dot) log(level LogLevel, levelName, color, message string, err error) {
 
 	fmt.Printf(
 		"%s%s%s %s%-8s%s %s%s%s\n",
-		ColorGray,
+		ColorWhite,
 		timestamp,
 		ColorReset,
 		color,
@@ -132,6 +133,10 @@ func (d *Dot) Fatal(message string) {
 	d.log(FATAL, "FATAL", ColorRed, message, nil)
 }
 
+func (d *Dot) Query(message string) {
+	d.log(QUERY, "Query", ColorGreen, message, nil)
+}
+
 func Debug(message string) {
 	defaultDot.Debug(message)
 }
@@ -154,6 +159,10 @@ func Error(message string) {
 
 func Fatal(message string) {
 	defaultDot.Fatal(message)
+}
+
+func Query(message string) {
+	defaultDot.Query(message)
 }
 
 func SetLogLevel(level LogLevel) {

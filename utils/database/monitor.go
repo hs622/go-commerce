@@ -4,18 +4,14 @@ import (
 	"context"
 	"fmt"
 
+	"github.com/hs622/ecommerce-cart/utils"
 	"go.mongodb.org/mongo-driver/v2/event"
 )
 
 type CommandMonitor struct{}
 
 func (c *CommandMonitor) Started(ctx context.Context, event *event.CommandStartedEvent) {
-	fmt.Printf(
-		"Command: %s\nDB: %s\nQuery: %v\n\n",
-		event.CommandName,
-		event.DatabaseName,
-		event.Command,
-	)
+	utils.Query(fmt.Sprintf("[%s] %v", event.CommandName, event.Command))
 }
 
 func (c *CommandMonitor) Failed(ctx context.Context, evt *event.CommandFailedEvent) {}
